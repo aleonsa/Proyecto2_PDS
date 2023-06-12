@@ -16,10 +16,30 @@
 // #define f       10
 // #define fs      1000
 
+void Goertzel(float *x, int len_x, double *y, int klim){
+	double vk0,vk1,vk2,AI, AR;
+	int k,n;
+	for(k=0; k<klim; k++){
+		vk0=0;
+		vk1=0;
+		vk2=0;
+		for(n=0;n<len_x;n++){	
+			vk0=x[n]+2*cos(2*PI*k/len_x)*vk1-vk2;
+			vk2=vk1;
+			vk1=vk0;
+		}
+		AR=vk0+vk1*cos(2*PI*k/len_x);
+		AI=vk1*sin(2*PI*k/len_x);
+		y[k]= sqrt(AR*AR+AI*AI);
+	}
+	
+}
 void normalizeArray(float arr[], int size) {
     // Encontrar el valor absoluto máximo en el arreglo
+    int i;
+    int j;
     float maxAbsValue = 0.0;
-    for (int i = 0; i < size; i++) {
+    for (i = 0; i < size; i++) {
         float absValue = fabs(arr[i]);
         if (absValue > maxAbsValue) {
             maxAbsValue = absValue;
@@ -27,7 +47,7 @@ void normalizeArray(float arr[], int size) {
     }
 
     // Normalizar los demás valores en proporción al máximo
-    for (int i = 0; i < size; i++) {
+    for ( i = 0; i < size; i++) {
         arr[i] /= maxAbsValue;
     }
 }
@@ -82,9 +102,9 @@ int main()
         fprintf(fvco, "%f\n", vco[n]);
     }
     // Generate consequent sinewaves
-    for (int i = 1; i < N_VI; i++)
+    for (i = 1; i < N_VI; i++)
     {
-        for (int j = 0; j < N; j++)
+        for (j = 0; j < N; j++)
         {
             vco_temp[j] = -a1[i]*vco[(i*N) + j-1] - a2*vco[(i*N) + j-2];
             //fprintf(fspec,"%f\n",vco_temp[j]);
@@ -92,7 +112,7 @@ int main()
             //fprintf(fvco, "%f\n", vco[(i*N) + j]);
         }
         normalizeArray(vco_temp,N);
-        for (int j = 0; j < N; j++)
+        for (j = 0; j < N; j++)
         {
             vco[(i*N)+j] = vco_temp[j];
             fprintf(fvco, "%f\n", vco[(i*N) + j]);
@@ -100,7 +120,12 @@ int main()
         
         
     }
-    
+   double espectro[6000];
+    Goertzel(vco,N_VI*N,espectro,6000);
+    for (i = 0; i < 6000; i++)
+        {
+            fprintf(fspec, "%f\n", espectro[i]);
+        }
 
     /***************************************************************************************/
 
