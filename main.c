@@ -4,17 +4,33 @@
 #include <math.h>
 #include <time.h>
 
-#define N_VI        2
+#define N_VI        30
 #define VI_MIN      0.0
 #define VI_MAX      10.0
 #define PI 	        3.14159265358979
 
-#define N           200
+#define N           2000
 #define MIN_CYCLES  5
 #define MAX_CYCLES  30
 
 // #define f       10
 // #define fs      1000
+
+void normalizeArray(float arr[], int size) {
+    // Encontrar el valor absoluto máximo en el arreglo
+    float maxAbsValue = 0.0;
+    for (int i = 0; i < size; i++) {
+        float absValue = fabs(arr[i]);
+        if (absValue > maxAbsValue) {
+            maxAbsValue = absValue;
+        }
+    }
+
+    // Normalizar los demás valores en proporción al máximo
+    for (int i = 0; i < size; i++) {
+        arr[i] /= maxAbsValue;
+    }
+}
 
 int main()
 {
@@ -58,6 +74,7 @@ int main()
     // Generate "first" sinewave
     vco[0] = 0;
     vco[1] = sin(w[0]);
+    float vco_temp[N];
 
     for (n = 2; n < N; n++)
     {
@@ -69,9 +86,18 @@ int main()
     {
         for (int j = 0; j < N; j++)
         {
+            vco_temp[j] = -a1[i]*vco[(i*N) + j-1] - a2*vco[(i*N) + j-2];
+            //fprintf(fspec,"%f\n",vco_temp[j]);
             vco[(i*N) + j] = -a1[i]*vco[(i*N) + j-1] - a2*vco[(i*N) + j-2];
+            //fprintf(fvco, "%f\n", vco[(i*N) + j]);
+        }
+        normalizeArray(vco_temp,N);
+        for (int j = 0; j < N; j++)
+        {
+            vco[(i*N)+j] = vco_temp[j];
             fprintf(fvco, "%f\n", vco[(i*N) + j]);
         }
+        
         
     }
     
